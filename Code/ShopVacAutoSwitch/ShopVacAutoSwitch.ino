@@ -1,6 +1,7 @@
 
 #define CURRENT_SENSOR_PIN A0 // Current sensor is connected to analog pin A0
 #define RELAY_PIN 2 // Relay module is connected to digital pin 2
+#define RELAY_LOGIC LOW //Set to LOW if your relay is activated by a ground signal. Set to HIGH if your relay is activated by a 5V signal. If your relay is active at bootup, and turns off when CURRENT_THRESHOLD is met, then try changing this setting to the opposite.  
 #define CURRENT_THRESHOLD 520 // The analog value above which the relay shall be triggered
 #define CURRENT_SAMPLE_PERIOD 500 // The number of milliseconds to sample the current reading
 #define RELAY_STARTUP_DELAY 2000 // The number of milliseconds to delay before activating relay after tool has started
@@ -25,16 +26,16 @@ void loop() {
     Serial.println(analogValue);
   }
 
-  // If the max ADC value from the current sensor exceeds the threshold, set the state to LOW
+  // If the max ADC value from the current sensor exceeds the threshold, activate the relay
   if(analogValue > CURRENT_THRESHOLD) {
     delay(RELAY_STARTUP_DELAY);
-    relayPinState=LOW;
+    relayPinState = RELAY_LOGIC;
   }
-  // Otherwise if the relay was just LOW wait for the predetermined shutoff delay and set the state to HIGH
+  // Otherwise if the relay was just activated, wait for the predetermined shutoff delay and set the state to HIGH
   else {
-    if(relayPinState == LOW) {
+    if(relayPinState == RELAY_LOGIC) {
       delay(RELAY_SHUTOFF_DELAY);
-      relayPinState=HIGH;
+      relayPinState = !relayPinState;
     }
   }
   digitalWrite(RELAY_PIN,relayPinState); // Write the RELAY_PIN to the correct state
